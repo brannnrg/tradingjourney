@@ -1,6 +1,5 @@
 # Trading Journey Tracker
-
-Personal trading journal untuk mencatat dan menganalisis Proses Trading. 
+Trading journal untuk mencatat dan menganalisis Proses Trading. 
 
 ## Fitur Lengkap
 

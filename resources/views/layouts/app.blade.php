@@ -4,12 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Trading Journey') }} — @yield('title', 'Dashboard')</title>
+    <title>{{ config('app.name', 'Trading Journey Tracker') }} — @yield('title', 'Dashboard')</title>
     <meta name="description" content="Personal crypto trading journal — track your trades, equity curve, and performance stats.">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,10 +18,13 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
                     colors: {
                         brand: { 400: '#4ade80', 500: '#22c55e', 600: '#16a34a' },
-                        dark: { 900: '#0a0d14', 800: '#111827', 700: '#1f2937', 600: '#374151' }
+                        dark: { 900: '#0a0d14', 850: '#0e131f', 800: '#111827', 750: '#172033', 700: '#1f2937', 600: '#374151' }
                     }
                 }
             }
@@ -30,7 +33,7 @@
 
     <style>
         body { background-color: #0a0d14; color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(17,24,39,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.07); }
+        .glass { background: rgba(17,24,39,0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.07); }
         .glass-light { background: rgba(31,41,55,0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); }
         .gradient-text { background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .sidebar-link { transition: all 0.2s; border-radius: 0.5rem; }
@@ -47,8 +50,8 @@
         .input-field { background: #1f2937; border: 1px solid rgba(255,255,255,0.1); color: #f1f5f9; border-radius: 0.5rem; transition: border-color 0.2s; }
         .input-field:focus { outline: none; border-color: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,0.2); }
         .input-field::placeholder { color: #6b7280; }
-        select.input-field option { background: #1f2937; }
-        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #111827; } ::-webkit-scrollbar-thumb { background: #374151; border-radius: 99px; }
+        select.input-field option { background: #1f2937; color: #f1f5f9; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: #0a0d14; } ::-webkit-scrollbar-thumb { background: #374151; border-radius: 99px; }
     </style>
 
     @stack('styles')
@@ -60,10 +63,10 @@
         {{-- Logo --}}
         <div class="p-6 border-b border-white/5">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl btn-primary flex items-center justify-center text-white font-bold text-lg">₿</div>
+                <div class="w-9 h-9 rounded-xl btn-primary flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-green-500/20">₿</div>
                 <div>
                     <div class="font-bold text-white text-sm leading-tight">Trading Journey</div>
-                    <div class="text-xs text-gray-500">Crypto Tracker</div>
+                    <div class="text-xs text-gray-500 font-mono">$100 Challenge</div>
                 </div>
             </a>
         </div>
@@ -83,7 +86,7 @@
 
         {{-- Navigation --}}
         <nav class="flex-1 p-4 space-y-1">
-            <p class="text-xs text-gray-600 uppercase tracking-widest px-3 mb-2 mt-1">Menu</p>
+            <p class="text-xs text-gray-600 uppercase tracking-widest px-3 mb-2 mt-1">Menu Utama</p>
 
             <a href="{{ route('dashboard') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -100,6 +103,11 @@
                 Trade Log
             </a>
 
+            <a href="{{ route('tags.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 {{ request()->routeIs('tags.*') ? 'active' : '' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                Tags & Setup
+            </a>
+
             <div class="pt-3 border-t border-white/5 mt-3">
                 <p class="text-xs text-gray-600 uppercase tracking-widest px-3 mb-2">Akun</p>
                 <a href="{{ route('profile.edit') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 {{ request()->routeIs('profile.*') ? 'active' : '' }}">
@@ -108,7 +116,7 @@
                 </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-400 hover:text-red-400">
+                    <button type="submit" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-400 hover:text-red-400 text-left">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         Logout
                     </button>
@@ -143,6 +151,12 @@
             <div class="mx-8 mt-4 px-4 py-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm flex items-center gap-2">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 {{ session('info') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="mx-8 mt-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                {{ session('error') }}
             </div>
         @endif
 

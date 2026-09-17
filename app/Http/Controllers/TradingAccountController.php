@@ -39,9 +39,9 @@ class TradingAccountController extends Controller
             'description'     => 'nullable|string|max:1000',
         ]);
 
-        Auth::user()->tradingAccounts()->create($validated);
+        $account = Auth::user()->tradingAccounts()->create($validated);
 
-        return redirect()->route('trading-accounts.index')
+        return redirect()->route('trading-accounts.show', $account)
             ->with('success', 'Akun trading berhasil dibuat!');
     }
 
@@ -57,6 +57,51 @@ class TradingAccountController extends Controller
         }, 'trades.tags']);
 
         return view('trading-accounts.show', compact('tradingAccount'));
+    }
+
+    /**
+     * Show report / printable journey summary for the trading account.
+     */
+    public function report(TradingAccount $tradingAccount)
+    {
+        $this->authorize($tradingAccount);
+
+        $trades = $tradingAccount->trades()
+            ->with('tags')
+            ->orderBy('entry_time', 'asc')
+            ->get();
+
+        // Monthly breakdown
+        $monthly = [];
+        foreach ($trades->where('status', 'closed') as $trade) {
+            if (!$trade->exit_time) continue;
+            $monthKey = $trade->exit_time->format('Y-m');
+            $monthLabel = $trade->exit_time->format('F Y');
+
+            if (!isset($monthly[$monthKey])) {
+                $monthly[$monthKey] = [
+                    'label'  => $monthLabel,
+                    'trades' => 0,
+                    'wins'   => 0,
+                    'losses' => 0,
+                    'pnl'    => 0.0,
+                ];
+            }
+
+            $monthly[$monthKey]['trades']++;
+            $monthly[$monthKey]['pnl'] += (float) $trade->profit_loss;
+            if ($trade->profit_loss > 0) $monthly[$monthKey]['wins']++;
+            if ($trade->profit_loss < 0) $monthly[$monthKey]['losses']++;
+        }
+
+        foreach ($monthly as $key => $val) {
+            $monthly[$key]['win_rate'] = $val['trades'] > 0
+                ? round(($val['wins'] / $val['trades']) * 100, 1)
+                : 0;
+            $monthly[$key]['pnl'] = round($val['pnl'], 4);
+        }
+
+        return view('trading-accounts.report', compact('tradingAccount', 'trades', 'monthly'));
     }
 
     /**

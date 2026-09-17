@@ -64,7 +64,7 @@ class Trade extends Model
                 $this->profit_loss = ($this->entry_price - $this->exit_price) * $this->quantity;
             }
 
-            // P/L % relative to cost (entry_price * quantity)
+            // P/L % relative to initial cost (entry_price * quantity)
             $cost = $this->entry_price * $this->quantity;
             if ($cost > 0) {
                 $this->profit_loss_percent = ($this->profit_loss / $cost) * 100;
@@ -89,6 +89,21 @@ class Trade extends Model
         return $this->belongsToMany(Tag::class, 'trade_tag');
     }
 
+    public function strategyTags()
+    {
+        return $this->tags()->where('type', 'strategy');
+    }
+
+    public function emotionTags()
+    {
+        return $this->tags()->where('type', 'emotion');
+    }
+
+    public function mistakeTags()
+    {
+        return $this->tags()->where('type', 'mistake');
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────────
 
     public function isProfitable(): bool
@@ -105,14 +120,42 @@ class Trade extends Model
     {
         if ($this->profit_loss === null) return '—';
         $sign = $this->profit_loss >= 0 ? '+' : '';
-        return $sign . number_format($this->profit_loss, 4) . ' ' . ($this->tradingAccount->currency ?? 'USDT');
+        $currency = $this->tradingAccount->currency ?? 'USDT';
+        return $sign . number_format($this->profit_loss, 4) . ' ' . $currency;
     }
 
     public function getRiskRewardAttribute(): ?float
     {
-        if (!$this->stop_loss || !$this->take_profit) return null;
+        if (!$this->stop_loss || !$this->take_profit || !$this->entry_price) return null;
+
         $risk = abs($this->entry_price - $this->stop_loss);
         $reward = abs($this->take_profit - $this->entry_price);
+
         return $risk > 0 ? round($reward / $risk, 2) : null;
+    }
+
+    public function getPositionValueAttribute(): float
+    {
+        return round($this->entry_price * $this->quantity, 4);
+    }
+
+    public function getDurationAttribute(): ?string
+    {
+        if (!$this->entry_time || !$this->exit_time) return null;
+
+        $diffMinutes = $this->entry_time->diffInMinutes($this->exit_time);
+        if ($diffMinutes < 60) {
+            return $diffMinutes . 'm';
+        }
+
+        $diffHours = $this->entry_time->diffInHours($this->exit_time);
+        if ($diffHours < 24) {
+            $remainingMinutes = $diffMinutes % 60;
+            return $diffHours . 'j ' . ($remainingMinutes > 0 ? $remainingMinutes . 'm' : '');
+        }
+
+        $diffDays = $this->entry_time->diffInDays($this->exit_time);
+        $remainingHours = $diffHours % 24;
+        return $diffDays . 'h ' . ($remainingHours > 0 ? $remainingHours . 'j' : '');
     }
 }

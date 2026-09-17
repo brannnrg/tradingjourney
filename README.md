@@ -1,8 +1,6 @@
 # Trading Journey Tracker
 
-Personal trading journal untuk mencatat dan menganalisis perjalanan trading crypto Anda — dari modal $100, $500, atau berapapun. Track setiap trade, pantau equity curve, dan temukan pola terbaik Anda.
-
----
+Personal trading journal untuk mencatat dan menganalisis Proses Trading. 
 
 ## Fitur Lengkap
 
